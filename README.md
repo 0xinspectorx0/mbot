@@ -1,5 +1,7 @@
 # Metin2-FishBot-AutoFish-Balikbotu-otomatik-balik-botu-metin2-level-botu-metin2-enerji-botu
 
+> 📖 **Programın ne yaptığına dair detaylı anlatım için:** [REHBER.md](REHBER.md)
+
 ## GENEL 
 
 **Sadece 1 oyun hesabını destekler**. Program ekran kaydı alma(yani görüntü işleme) mantığıyla yapılmıştır ve alınan görüntü işlenerek gerekli işlemler yapılmıştır. **Yani gerçek kişi balık tutuyormuş gibi program çalışır ve onun haricinde bilgisayarın başka bir program çalıştırması yada program açık iken sizin başka işlem yapmanız mümkün OLMAZ**.
