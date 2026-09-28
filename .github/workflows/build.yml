@@ -65,3 +65,5 @@ jobs:
           if ($LASTEXITCODE -eq 0) { Write-Host "Exe guncellenmedi, commit yok."; exit 0 }
           git commit -m "Build: update Metin2AutoFishCSharp.exe [skip ci]"
           git push origin arena/01a0e921-mbot
+
+# Build betigi: hatalar annotation olarak raporlanir, basarili derlemede exe repoya commit lenir.
