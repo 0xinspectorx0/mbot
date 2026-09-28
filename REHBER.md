@@ -85,6 +85,9 @@ mesajı, aktif olan modu tek tuşla durdurur.
 
 ### 4.1 Fishing (Balık Botu)
 
+> 📖 **Ayrıntılı modül belgesi:** Solucan, Kamp Ateşi ve Izgara akışının adım adım, fonksiyon
+> fonksiyon dökümü için → **[HAZIRLIK_MODULU.md](HAZIRLIK_MODULU.md)**
+
 **Hazırlık aşaması** — `Sources/GameHandler/PrepareFishing.cs`
 - Balıkçı NPC'yi ekran görüntüsünden bulur (`FindFisher`).
 - Gerekirse **solucan alır** ve slotlara dizer (`BuyFiftyWormAsNeeded` → en fazla 50).

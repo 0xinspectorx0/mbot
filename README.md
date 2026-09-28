@@ -1,6 +1,7 @@
 # Metin2-FishBot-AutoFish-Balikbotu-otomatik-balik-botu-metin2-level-botu-metin2-enerji-botu
 
-> 📖 **Programın ne yaptığına dair detaylı anlatım için:** [REHBER.md](REHBER.md)
+> 📖 **Programın ne yaptığına dair detaylı anlatım için:** [REHBER.md](REHBER.md) —
+> Hazırlık modülü (solucan, kamp ateşi, ızgara) için: [HAZIRLIK_MODULU.md](HAZIRLIK_MODULU.md)
 
 ## GENEL 
 
