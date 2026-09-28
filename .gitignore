@@ -1,0 +1,4 @@
+# Derleme artıkları (build artifacts)
+bin/
+obj/
+.vs/
