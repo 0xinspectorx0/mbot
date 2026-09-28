@@ -1,0 +1,33 @@
+name: Build Metin2AutoFishCSharp
+
+on:
+  push:
+    branches: [ arena/01a0e921-mbot ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Restore NuGet packages
+        run: nuget restore MusicPlayerApp.sln
+
+      - name: Build (Debug)
+        run: msbuild MusicPlayerApp.sln /m /p:Configuration=Debug /v:minimal
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: Metin2AutoFishCSharp-Debug
+          path: bin/Debug/
+          if-no-files-found: error
