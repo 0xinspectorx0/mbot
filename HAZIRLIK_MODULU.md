@@ -1,7 +1,7 @@
 # Hazırlık Modülü — Solucan, Kamp Ateşi ve Izgara (PrepareFishing.cs)
 
 > Bu belge, balık botunun **hazırlık aşamasını** yürüten `Sources/GameHandler/PrepareFishing.cs`
-> dosyasını (877 satır) fonksiyon fonksiyon, adım adım açıklar.
+> dosyasını (921 satır) fonksiyon fonksiyon, adım adım açıklar.
 > İlgili belge: [REHBER.md](REHBER.md) §4.1
 
 ---
@@ -373,6 +373,9 @@ kadar satın alma döngüsünü yönet. Hedefe ulaşırsa `true`, zaman aşımı
        1. Bayrak çıkışı: `isFishingStopped || isCharKilled` → `false`.
        2. `BuyFiftyWormAsNeeded(worms200CharHave)` — eksik kadar satın al.
        3. `listWorm200.Clear()` → yeniden birleştir/say.
+       4. **`HoverAllInventorySlotsWithoutClick()`** — satın alma sonrası 1. ve 2.
+          envanter sayfasındaki **tüm 90 yuvaların üzerinden tıklamadan** imlec gezdirilir
+          (bkz. §6.4), **sonra** `CombineItemsTo200` ile birleştirmeye devam edilir.
      - `worms200CharHave == -1` ise: sadece yeniden dene (birleştirme hatası).
    - **Süre doldu:** log → `return false`.
 3. `worms200CharHave >= 32` → **`return true`**.
@@ -397,6 +400,33 @@ eksik yığınları satın al.
          - **Eşleşti ("yer yok" dialog'u):** log → **ESC** → `return`
            (daha fazla satın alma yapılmaz; üst fonksiyon devam eder/biter).
 2. **`else`:** log `"Fisher shop page is not open"` → `return`.
+
+---
+
+### 6.4 `HoverAllInventorySlotsWithoutClick()` — private void
+
+**Görev:** Yem satın alma işleminden sonra, birleştirme işlemine devam etmeden önce
+**1. ve 2. envanter sayfasındaki tüm yuvaların üzerinden sırayla imleci gezdirmek —
+hiç tıklama yapmadan.** (Kullanıcı isteğiyle eklendi.)
+
+**Adım adım:**
+
+1. Bayrak çıkışı: `isFishingStopped || isCharKilled` → `return`.
+2. `OpenCloseInventory(true)` — envanter açık olmalı (yuvalar görünür olsun).
+3. **`for page = 1..2`:**
+   1. `ClickWantedInventoryPage(Page_1 / Page_2)` — sayfa sekmesine tıklanır
+      (sayfa değiştirmenin başka yolu yok; **yuvaların üzerine tıklanmaz**).
+   2. **`for y = 0..8`, `for x = 0..4`** (satır içi, soldan sağa — 5×9 = 45 yuva/sayfa):
+      1. Bayrak kontrolü → çıkış.
+      2. Yuva merkezi hesaplanır:
+         `X = RectFirstSlotPlace.X + 32*x + width/2`,
+         `Y = RectFirstSlotPlace.Y + 32*y + height/2`
+         (`DISTANCE_BTWN_INV_SLOTS = 32`).
+      3. **`inputGame.MouseMove(x, y)`** — yalnızca `SetCursorPos` (imlec taşıma,
+         **tıklama yok**); `MouseMove` içinde zaten 40–60 ms rastgele bekleme var.
+4. Toplam: 2 sayfa × 45 yuva = **90 hover**, ~4–6 saniye sürer; bitişte log basılır.
+5. Dönüşten sonra akış `CombineItemsTo200` ile **birleştirmeye devam eder**
+   (çağrı yeri: `CombineAndCountWorms`, §6.2 adım 4).
 
 ---
 

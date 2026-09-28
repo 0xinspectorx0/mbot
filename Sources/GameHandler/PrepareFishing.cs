@@ -1,4 +1,4 @@
-﻿using MusicPlayerApp.Debugs;
+using MusicPlayerApp.Debugs;
 using MusicPlayerApp.Sources.CharacterHandle;
 using MusicPlayerApp.Sources.CoordinatesHandler;
 using MusicPlayerApp.Sources.ImageHandle;
@@ -311,6 +311,10 @@ namespace MusicPlayerApp.Sources.GameHandler
                         }
                         BuyFiftyWormAsNeeded(worms200CharHave);
                         listWorm200.Clear();
+                        // Yem satin almasindan sonra, birlestirmeye devam etmeden once
+                        // 1. ve 2. envanter sayfasindaki TUM yuvalarin uzerinden
+                        // sadece imlec gezdirilir (tiklama yok).
+                        HoverAllInventorySlotsWithoutClick();
                         worms200CharHave = charThings.CombineItemsTo200(imageObjects.arrayWorm200);
                     }
                     else
@@ -359,6 +363,47 @@ namespace MusicPlayerApp.Sources.GameHandler
                 return;
             }
            
+        }
+
+        // Yem satin alma isleminde kullanilir: 1. ve 2. envanter sayfasindaki tum
+        // yuvalarin uzerinden sirayla sadece imlec gezdirilir (HIÇ tiklama yapilmaz),
+        // is bittikten sonra birlestirmeye (CombineItemsTo200) devam edilir.
+        private void HoverAllInventorySlotsWithoutClick()
+        {
+            DebugPfCnsl.println("HoverAllInventorySlotsWithoutClick is running");
+
+            if (ThreadGlobals.isFishingStopped || ThreadGlobals.isCharKilled) return;
+
+            // Yuvalarin uzerinde gezilebilmesi icin envanter acik olmali
+            charThings.OpenCloseInventory(true);
+
+            for (int page = 1; page <= 2; page++)
+            {
+                // Sayfa degistirmek icin sekme tiklanir; yuvalarin uzerine TIKLANMAZ
+                charThings.ClickWantedInventoryPage(page == 1 ? InventoryPage.Page_1 : InventoryPage.Page_2);
+
+                // 5 kolon x 9 satir = 45 yuva, sayfa basina
+                for (int y = 0; y < 9; y++)
+                {
+                    for (int x = 0; x < 5; x++)
+                    {
+                        if (ThreadGlobals.isFishingStopped || ThreadGlobals.isCharKilled) return;
+
+                        int xPos = coordinate.RectFirstSlotPlace().X
+                            + (GameObjectCoordinates.DISTANCE_BTWN_INV_SLOTS * x)
+                            + (coordinate.RectFirstSlotPlace().Width / 2);
+                        int yPos = coordinate.RectFirstSlotPlace().Y
+                            + (GameObjectCoordinates.DISTANCE_BTWN_INV_SLOTS * y)
+                            + (coordinate.RectFirstSlotPlace().Height / 2);
+
+                        // Sadece imlec tasi (SetCursorPos) — tiklama yok.
+                        // MouseMove icinde 40-60 ms rastgele bekleme zaten var.
+                        inputGame.MouseMove(xPos, yPos);
+                    }
+                }
+            }
+
+            DebugPfCnsl.println("HoverAllInventorySlotsWithoutClick finished (2 sayfa, 90 yuva)");
         }
 
         private void BuyKampAtasiFromFisher()
