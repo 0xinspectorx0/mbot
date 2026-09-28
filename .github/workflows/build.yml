@@ -5,6 +5,9 @@ on:
     branches: [ arena/01a0e921-mbot ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -23,11 +26,42 @@ jobs:
         run: nuget restore MusicPlayerApp.sln
 
       - name: Build (Debug)
-        run: msbuild MusicPlayerApp.sln /m /p:Configuration=Debug /v:minimal
+        shell: pwsh
+        run: |
+          msbuild MusicPlayerApp.sln /m /p:Configuration=Debug /v:minimal 2>&1 | Tee-Object -FilePath build.log
+          $code = $LASTEXITCODE
+          $lines = Get-Content build.log
+          $errs = $lines | Select-String -Pattern ': error |error CS\d+|error MSB\d+'
+          if ($errs) {
+            $all = ($errs | ForEach-Object { $_.Line.Trim() }) -join [char]10
+            Write-Host "::error::$all"
+          } else {
+            $tail = ($lines | Select-Object -Last 50) -join [char]10
+            Write-Host "::error::Hata satiri yakalanamadi, log sonu: $tail"
+          }
+          if ($code -ne 0) {
+            $tail = ($lines | Select-Object -Last 30) -join [char]10
+            Write-Host "::error::BUILD FAILED (exit $code) - log sonu: $tail"
+          }
+          exit $code
 
       - name: Upload build output
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: Metin2AutoFishCSharp-Debug
           path: bin/Debug/
           if-no-files-found: error
+
+      - name: Commit built exe to branch
+        if: success()
+        shell: pwsh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          Copy-Item bin/Debug/Metin2AutoFishCSharp.exe Metin2AutoFishCSharp.exe -Force
+          git add Metin2AutoFishCSharp.exe
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 0) { Write-Host "Exe guncellenmedi, commit yok."; exit 0 }
+          git commit -m "Build: update Metin2AutoFishCSharp.exe [skip ci]"
+          git push origin arena/01a0e921-mbot
