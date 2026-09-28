@@ -1,4 +1,4 @@
-﻿using MusicPlayerApp.Debugs;
+using MusicPlayerApp.Debugs;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -53,6 +53,28 @@ namespace MusicPlayerApp.Sources
         {
             //string currentDirect = Environment.CurrentDirectory;
             string currentDirect = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+
+            // ONCE exe'nin yanindaki klasorlerde dene (mbot/Images, mbot/Fishes ...).
+            // Boylece exe klasor kokune indiginde (zip duzeni) her iki arrange de calisir.
+            try
+            {
+                string localWay = currentDirect;
+                bool localFolderOk = true;
+                for (int k = 0; k < folderNames.Length; k++)
+                {
+                    localWay = Path.Combine(localWay, folderNames[k]);
+                    if (!Directory.Exists(localWay)) { localFolderOk = false; break; }
+                }
+                if (localFolderOk)
+                {
+                    return Path.Combine(localWay, fileName);
+                }
+            }
+            catch (Exception exLocal)
+            {
+                DebugPfCnsl.println("local path check failed: " + exLocal.Message);
+            }
+
             string[] stringArray = currentDirect.Split('\\');
 
             string temp = "";
@@ -153,6 +175,23 @@ namespace MusicPlayerApp.Sources
         /// find, returns NULL.</returns>
         public static string FindFolderNameFromBase(String folderName)
         {
+            // 1) once exe'nin yanindaki klasorde ara (duz zip duzeni: mbot\ChatResources\...)
+            string exeDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
+            try
+            {
+                string localFolder = Path.Combine(exeDir, folderName);
+                if (Directory.Exists(localFolder)) return localFolder;
+
+                // 2) exe klasorunun icinde rekurser ara (ChatResources\ChatQuestionAnswer gibi)
+                string[] localFound = Directory.GetDirectories(exeDir, folderName, SearchOption.AllDirectories);
+                if (localFound.Length > 0) return localFound[0];
+            }
+            catch (Exception exLocal)
+            {
+                DebugPfCnsl.println("local folder search failed: " + exLocal.Message);
+            }
+
+            // 3) eski yon: ust-ust klasorden rekurser arama (VS bin\Debug duzeni)
             string currentDirect = Environment.CurrentDirectory;
             string[] stringArray = currentDirect.Split('\\');
 
@@ -168,6 +207,12 @@ namespace MusicPlayerApp.Sources
 
             }
            // DebugPfCnsl.println("parsedWay = " + parsedWay);
+
+            if (string.IsNullOrEmpty(parsedWay) || !Directory.Exists(parsedWay))
+            {
+                // klasor cok koksuz (orn. C:\mbot) — arama yapilamaz
+                throw new FileNotFoundException("Wanted folder is not found !! " + folderName);
+            }
 
             string[] foldarPaths = Directory.GetDirectories(parsedWay,folderName,SearchOption.AllDirectories);
 
